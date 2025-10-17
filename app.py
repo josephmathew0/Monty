@@ -21,8 +21,9 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app = dash.Dash(__name__)
 app.title = "Monty - LinkedIn Career Insight"
 
-<<<<<<< HEAD
-# Global placeholders (loaded lazily)
+# -------------------------------
+# Global placeholders (lazy load)
+# -------------------------------
 data_loader = None
 matcher = None
 job_df = None
@@ -31,19 +32,18 @@ _geo_cache = None
 
 
 # -------------------------------
-# Helper: Lazy initialization
+# Lazy initialization
 # -------------------------------
 def ensure_initialized():
     """Initialize heavy components only once."""
     global data_loader, matcher, job_df, viz_tools
     if data_loader is None:
-        print("🧠 Initializing model and data on demand...")
+        print("Initializing model and data on demand...")
         data_loader = DataAndModelInitializer()
         model = data_loader.load_model()
         job_df_local = data_loader.load_job_data()
         matcher_local = EmbeddingProcessor(model)
         viz_tools_local = VisualizationTools()
-        # assign globals
         globals().update({
             "matcher": matcher_local,
             "job_df": job_df_local,
@@ -61,7 +61,7 @@ def get_geo_df(top_job_title=None):
             ensure_initialized()
         _geo_cache = data_loader.load_geographic_job_data(top_job_title)
     except Exception as e:
-        print("⚠️ Could not load geographic data:", e)
+        print("Warning: Could not load geographic data:", e)
         _geo_cache = pd.DataFrame()
     return _geo_cache
 
@@ -70,22 +70,7 @@ def get_geo_df(top_job_title=None):
 # Helpers for parsing
 # -------------------------------
 def save_pdf(contents):
-=======
-# -------------------------------
-# Load models and data
-# -------------------------------
-data_loader = DataAndModelInitializer()
-model = data_loader.load_model()
-job_df = data_loader.load_job_data()
-matcher = EmbeddingProcessor(model)
-viz_tools = VisualizationTools()
-
-# -------------------------------
-# Helper functions
-# -------------------------------
-def save_pdf(contents):
     """Temporarily save uploaded PDF."""
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
     content_type, content_string = contents.split(',')
     decoded = base64.b64decode(content_string)
     file_path = os.path.join(UPLOAD_FOLDER, f"{uuid.uuid4()}.pdf")
@@ -95,10 +80,7 @@ def save_pdf(contents):
 
 
 def clean_match_input(profile):
-<<<<<<< HEAD
-=======
     """Combine cleaned text fields for embedding matching."""
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
     def clean(text):
         if not text:
             return ""
@@ -107,26 +89,16 @@ def clean_match_input(profile):
         text = re.sub(r"Page \d+ of \d+", "", text)
         return text.strip()
 
-    title = clean(profile['title'])
-    summary = clean(profile['summary'])
-    education = clean(profile['education'])
-    skills = clean(profile['skills'])
-    experience = clean(profile['experience'])
-<<<<<<< HEAD
+    title = clean(profile.get('title', ''))
+    summary = clean(profile.get('summary', ''))
+    education = clean(profile.get('education', ''))
+    skills = clean(profile.get('skills', ''))
+    experience = clean(profile.get('experience', ''))
     return f"{title}. {summary}. {education}. {skills}. {experience}"
 
 
 # -------------------------------
 # Upload Preview
-=======
-
-    combined = f"{title}. {summary}. {education}. {skills}. {experience}"
-    return combined
-
-
-# -------------------------------
-# Upload preview callback
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
 # -------------------------------
 @app.callback(
     Output('upload-preview', 'children'),
@@ -135,11 +107,7 @@ def clean_match_input(profile):
     State('upload-pdf', 'last_modified')
 )
 def update_upload_preview(contents, filename, last_modified):
-<<<<<<< HEAD
     if contents:
-=======
-    if contents is not None:
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
         try:
             _, content_string = contents.split(',')
             decoded = base64.b64decode(content_string)
@@ -174,17 +142,8 @@ app.layout = html.Div([
     ),
 
     html.Div(id='upload-preview'),
-<<<<<<< HEAD
     html.Button('Submit', id='submit-button', n_clicks=0),
 
-=======
-
-    html.Button('Submit', id='submit-button', n_clicks=0),
-
-    # -----------------------------
-    # Region filter dropdown
-    # -----------------------------
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
     html.Div([
         html.Label("🌎 Filter by Region:"),
         dcc.Dropdown(
@@ -202,10 +161,6 @@ app.layout = html.Div([
         )
     ], style={'marginTop': '20px', 'marginBottom': '10px'}),
 
-<<<<<<< HEAD
-=======
-    # Output section (profile, charts, maps)
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
     dcc.Loading(
         id='loading-section',
         type='circle',
@@ -216,11 +171,7 @@ app.layout = html.Div([
 
 
 # -------------------------------
-<<<<<<< HEAD
 # Main callback
-=======
-# Main callback for processing & visualization
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
 # -------------------------------
 @app.callback(
     Output('output-section', 'children'),
@@ -229,39 +180,23 @@ app.layout = html.Div([
     [State('upload-pdf', 'contents')]
 )
 def update_output(n_clicks, region_filter, contents):
-<<<<<<< HEAD
     if n_clicks > 0 and contents:
-        ensure_initialized()  # Initialize model/data on demand
+        ensure_initialized()
 
         pdf_path = save_pdf(contents)
         profile = extract_linkedin_info(pdf_path)
-=======
-    if n_clicks > 0 and contents is not None:
-        pdf_path = save_pdf(contents)
-        profile = extract_linkedin_info(pdf_path)
-
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
         match_input = clean_match_input(profile)
         top_roles = matcher.find_top_roles(match_input, job_df)
         top_job_title = top_roles[0][0] if top_roles else None
 
-<<<<<<< HEAD
         geo_df = get_geo_df(top_job_title) if top_job_title else pd.DataFrame()
         print(f"Geo DF rows: {len(geo_df)}")
-=======
-        geo_df = data_loader.load_geographic_job_data(top_job_title) if top_job_title else pd.DataFrame()
-        print(f"Unique titles in geo_df: {geo_df['OCC_TITLE'].unique()[:20] if not geo_df.empty else 'None'}")
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
 
         salary_chart, role_salary, national_salary = (
             viz_tools.generate_salary_chart(job_df, top_job_title)
             if top_job_title else (None, None, None)
         )
 
-<<<<<<< HEAD
-=======
-        # Generate geographic map with region filter
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
         geo_map_html = viz_tools.generate_geographic_map(
             geo_df, top_job_title, region_filter
         ) if not geo_df.empty else ""
@@ -272,12 +207,6 @@ def update_output(n_clicks, region_filter, contents):
         role_salary_fmt = f"${int(role_salary):,}" if role_salary else "N/A"
         national_salary_fmt = f"${int(national_salary):,}" if national_salary else "N/A"
 
-<<<<<<< HEAD
-=======
-        print(f"Top job title: {top_job_title}")
-        print(f"Geo DF rows: {len(geo_df)}")
-
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
         interpretation_text = html.Div([
             html.P("💡 Insight:", style={'fontWeight': 'bold', 'marginBottom': '5px', 'fontSize': '16px'}),
             html.P(
@@ -292,11 +221,7 @@ def update_output(n_clicks, region_filter, contents):
             'padding': '12px',
             'marginTop': '15px',
             'borderRadius': '5px',
-<<<<<<< HEAD
             'boxShadow': '1px 1px 4px rgba(0,0,0,0.05)'
-=======
-            'boxShadow': '1px 1px 4px rgba(0, 0, 0, 0.05)'
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
         })
 
         return html.Div([
@@ -322,25 +247,12 @@ def update_output(n_clicks, region_filter, contents):
             dcc.Markdown("This map shows which U.S. states employ the highest number of workers in your suggested job role."),
             html.Iframe(srcDoc=geo_map_html, width="100%", height="500")
         ])
-<<<<<<< HEAD
-=======
-
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
     return ""
 
 
 # -------------------------------
-<<<<<<< HEAD
 # Run server
 # -------------------------------
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get("PORT", 8050))
     app.run_server(host="0.0.0.0", port=port, debug=False)
-
-=======
-# Run the server
-# -------------------------------
-if __name__ == '__main__':
-    app.run_server(debug=True)
->>>>>>> 25283421 (🚀 Rebuilt Monty project with new architecture and parser)
