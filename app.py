@@ -189,17 +189,17 @@ def update_output(n_clicks, region_filter, contents):
         top_roles = matcher.find_top_roles(match_input, job_df)
         top_job_title = top_roles[0][0] if top_roles else None
 
-        geo_df = get_geo_df(top_job_title) if top_job_title else pd.DataFrame()
-        print(f"Geo DF rows: {len(geo_df)}")
-
+        # ✅ Enable salary chart (lightweight)
         salary_chart, role_salary, national_salary = (
             viz_tools.generate_salary_chart(job_df, top_job_title)
             if top_job_title else (None, None, None)
         )
 
-        geo_map_html = viz_tools.generate_geographic_map(
-            geo_df, top_job_title, region_filter
-        ) if not geo_df.empty else ""
+        # 🚫 Disable geographic map (heavy)
+        # geo_df = get_geo_df(top_job_title) if top_job_title else pd.DataFrame()
+        # geo_map_html = viz_tools.generate_geographic_map(
+        #     geo_df, top_job_title, region_filter
+        # ) if not geo_df.empty else ""
 
         ratio = round(role_salary / national_salary, 1) if national_salary else None
         direction = "higher" if ratio and ratio >= 1 else "lower"
@@ -244,8 +244,7 @@ def update_output(n_clicks, region_filter, contents):
 
             html.Hr(),
             html.H4("🗺 Geographic Distribution of Jobs:"),
-            dcc.Markdown("This map shows which U.S. states employ the highest number of workers in your suggested job role."),
-            html.Iframe(srcDoc=geo_map_html, width="100%", height="500")
+            html.P("💤 Map visualization temporarily disabled for performance.")
         ])
     return ""
 
