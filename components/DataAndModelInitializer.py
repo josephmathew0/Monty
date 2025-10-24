@@ -120,3 +120,18 @@ class DataAndModelInitializer:
         except Exception as e:
             print("❌ Error filtering geographic job data:", e)
             return pd.DataFrame(columns=["AREA_TITLE", "OCC_TITLE", "TOT_EMP", "H_MEAN"])
+
+
+    # ---------------------------
+    # Education dataset
+    # ---------------------------
+    def load_education_level_data(self):
+        """Load the preprocessed education level data (Required Level of Education)."""
+        try:
+            df = pd.read_csv("project_data/education_levels.csv")
+            if "Title" in df.columns:
+                df["Title"] = df["Title"].astype(str).str.strip().str.lower()
+            return df
+        except Exception as e:
+            print("❌ Error loading education data:", e)
+            return pd.DataFrame(columns=["Title", "EducationScore"])

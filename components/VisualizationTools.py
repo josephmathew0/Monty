@@ -197,3 +197,59 @@ class VisualizationTools:
         except Exception as e:
             print("Error generating map:", e)
             return "<div style='color:red'>Map could not be generated.</div>"
+
+    # ------------------------------
+    # Education Level Insight Chart
+    # ------------------------------
+    def generate_education_level_chart(self, edu_df, job_title):
+        import plotly.graph_objs as go
+
+        if edu_df.empty or not job_title:
+            return dcc.Markdown("⚠️ Education data not available for this role.")
+
+        job_title_clean = job_title.strip().lower()
+        row = edu_df[edu_df["Title"].str.contains(job_title_clean, na=False)]
+        if row.empty:
+            return dcc.Markdown("⚠️ No education info found for this occupation.")
+
+        score = float(row["EducationScore"].iloc[0])
+
+        # Interpret numeric scale (approximate mapping)
+        if score < 7:
+            level = "High School"
+        elif score < 8:
+            level = "Associate Degree"
+        elif score < 8.8:
+            level = "Bachelor’s Degree"
+        elif score < 9.3:
+            level = "Master’s Degree"
+        else:
+            level = "Doctorate"
+
+        # Simple gauge-style bar chart
+        fig = go.Figure(go.Indicator(
+            mode="gauge+number",
+            value=score,
+            number={'suffix': " / 12"},
+            title={'text': f"Typical Education: {level}"},
+            gauge={
+                'axis': {'range': [6, 10]},
+                'bar': {'color': "#1f77b4"},
+                'steps': [
+                    {'range': [6, 7], 'color': '#f4cccc'},
+                    {'range': [7, 8], 'color': '#ffe599'},
+                    {'range': [8, 9], 'color': '#b6d7a8'},
+                    {'range': [9, 10], 'color': '#9fc5e8'},
+                ],
+            }
+        ))
+
+        fig.update_layout(
+            height=400,
+            margin=dict(l=40, r=40, t=60, b=60),
+            autosize=True,
+            paper_bgcolor="white",
+            plot_bgcolor="white"
+        )
+
+        return dcc.Graph(figure=fig)

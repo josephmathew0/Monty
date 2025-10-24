@@ -189,6 +189,9 @@ def update_output(n_clicks, region_filter, contents):
         top_roles = matcher.find_top_roles(match_input, job_df)
         top_job_title = top_roles[0][0] if top_roles else None
 
+        edu_df = data_loader.load_education_level_data()
+
+
         # ✅ Enable salary chart (lightweight)
         salary_chart, role_salary, national_salary = (
             viz_tools.generate_salary_chart(job_df, top_job_title)
@@ -200,6 +203,10 @@ def update_output(n_clicks, region_filter, contents):
         # geo_map_html = viz_tools.generate_geographic_map(
         #     geo_df, top_job_title, region_filter
         # ) if not geo_df.empty else ""
+
+        # 🎓 Education Level Insight
+        edu_chart = viz_tools.generate_education_level_chart(edu_df, top_job_title)
+
 
         ratio = round(role_salary / national_salary, 1) if national_salary else None
         direction = "higher" if ratio and ratio >= 1 else "lower"
@@ -244,7 +251,12 @@ def update_output(n_clicks, region_filter, contents):
 
             html.Hr(),
             html.H4("🗺 Geographic Distribution of Jobs:"),
-            html.P("💤 Map visualization temporarily disabled for performance.")
+            html.P("💤 Map visualization temporarily disabled for performance."),
+
+            html.Hr(),
+            html.H4("🎓 Typical Education Requirement:"),
+            edu_chart,
+
         ])
     return ""
 
